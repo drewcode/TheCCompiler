@@ -72,10 +72,12 @@ Token *numeric(LexerState *state) {
 	if(is_real) {
 		double *literal = (double *) malloc(sizeof(double));
 		*literal = atof(lexeme);
+		free(lexeme);
 		return create_token(DOUBLE_LITERAL, literal);
 	} else {
 		int *literal = (int *) malloc(sizeof(int));
 		*literal = atoi(lexeme);
+		free(lexeme);
 		return create_token(INT_LITERAL, literal);
 	}
 }
