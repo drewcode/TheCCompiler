@@ -7,9 +7,13 @@ using std::vector;
 
 typedef int (*char_pred)(char c);
 
+typedef struct LexerState {
+	const char *source; // The source file
+	long int start; // The start index of the current lexeme
+	long int current; // The next character to be read from the stream
+} LexerState;
 
-
-Token *next_token(const char *, long int *, long int);
+Token *next_token(LexerState *);
 
 int is_digit(char c) {
 	return (c >= '0' && c <= '9');
@@ -23,47 +27,47 @@ int is_alphanum(char c) {
 	return is_digit(c) || is_alpha(c);
 }
 
-int is_at_end(const char *source, long int current) {
-	return source[current] == '\0';
+int is_at_end(LexerState *state) {
+	return state->source[state->current] == '\0';
 }
 
-char advance(const char *source, long int *current) {
-	*current += 1;
-	return source[*current - 1];
+char advance(LexerState *state) {
+	state->current += 1;
+	return state->source[state->current - 1];
 }
 
-char peek(const char *source, long int current) {
-	return source[current];
+char peek(LexerState *state) {
+	return state->source[state->current];
 }
 
-int lookahead_match(const char *source, long int *current, char c) {
-	if(peek(source, *current) == c) {
-		advance(source, current);
+int lookahead_match(LexerState *state, char c) {
+	if(peek(state) == c) {
+		advance(state);
 		return 1;
 	} else {
 		return 0;
 	}
 }
 
-int lookahead_pmatch(const char *source, long int *current, char_pred predicate) {
-	if(predicate(peek(source, *current))) {
-		advance(source, current);
+int lookahead_pmatch(LexerState *state, char_pred predicate) {
+	if(predicate(peek(state))) {
+		advance(state);
 		return 1;
 	} else {
 		return 0;
 	}
 }
 
-Token *numeric(const char *source, long int *current, long int start) {
+Token *numeric(LexerState *state) {
 	int is_real = 0;
 
-	while(lookahead_pmatch(source, current, is_digit));
-	if(lookahead_match(source, current, '.')) {
+	while(lookahead_pmatch(state, is_digit));
+	if(lookahead_match(state, '.')) {
 		is_real = 1;
 	}
-	while(lookahead_pmatch(source, current, is_digit));
+	while(lookahead_pmatch(state, is_digit));
 
-	char *lexeme = strndup(source + start, *current - start);
+	char *lexeme = strndup(state->source + state->start, state->current - state->start);
 
 	if(is_real) {
 		double *literal = (double *) malloc(sizeof(double));
@@ -76,10 +80,10 @@ Token *numeric(const char *source, long int *current, long int start) {
 	}
 }
 
-Token *id_or_keyword(const char *source, long int *current, long int start) {
-	while(lookahead_pmatch(source, current, is_alphanum));
+Token *id_or_keyword(LexerState *state) {
+	while(lookahead_pmatch(state, is_alphanum));
 
-	char *literal = strndup(source + start, *current - start);
+	char *literal = strndup(state->source + state->start, state->current - state->start);
 
 	//TODO: Make this logic more efficient
 	if(strcmp(literal, "while") == 0) {
@@ -105,15 +109,16 @@ Token *id_or_keyword(const char *source, long int *current, long int start) {
 
 vector<Token *> tokenize(const char *source) {
 
+	LexerState state = {
+		.source = source,
+		.start = 0,
+		.current = 0
+	};
 
-
-	long int start = 0;
-	long int current = 0;
-	long int line = 1;
 	vector<Token *> tokens;
-	while(!is_at_end(source, current)) {
-		start = current;
-		Token* token = next_token(source, &current, start);
+	while(!is_at_end(&state)) {
+		state.start = state.current;
+		Token* token = next_token(&state);
 		if(token != NULL) {
 			tokens.push_back(token);
 		}
@@ -122,8 +127,8 @@ vector<Token *> tokenize(const char *source) {
 	return tokens;
 }
 
-Token *next_token(const char *source, long int *current, long int start) {
-	char c = advance(source, current);
+Token *next_token(LexerState *state) {
+	char c = advance(state);
 	switch(c) {
 		case ';':
 			return create_token(SEMI_COLON, NULL);
@@ -158,15 +163,15 @@ Token *next_token(const char *source, long int *current, long int start) {
 			break;
 
 		case '=':
-			return lookahead_match(source, current, '=') ? create_token(EQUAL_EQUAL, NULL) : create_token(EQUAL, NULL);
+			return lookahead_match(state, '=') ? create_token(EQUAL_EQUAL, NULL) : create_token(EQUAL, NULL);
 			break;
 
 		case '>':
-			return lookahead_match(source, current, '=') ? create_token(GREATER_EQUAL, NULL) : create_token(GREATER, NULL);
+			return lookahead_match(state, '=') ? create_token(GREATER_EQUAL, NULL) : create_token(GREATER, NULL);
 			break;
 
 		case '<':
-			return lookahead_match(source, current, '=') ? create_token(LESSER_EQUAL, NULL) : create_token(LESSER, NULL);
+			return lookahead_match(state, '=') ? create_token(LESSER_EQUAL, NULL) : create_token(LESSER, NULL);
 			break;
 
 		case ' ':
@@ -176,9 +181,9 @@ Token *next_token(const char *source, long int *current, long int start) {
 
 		default:
 			if(is_digit(c)) {
-				return numeric(source, current, start);
+				return numeric(state);
 			} else if(is_alpha(c)) {
-				return id_or_keyword(source, current, start);
+				return id_or_keyword(state);
 			}
 			break;
 	}
