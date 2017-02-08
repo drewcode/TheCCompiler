@@ -41,11 +41,13 @@ typedef enum TokenType {
 typedef struct Token {
 	TokenType type;
 	void *literal;
+	long int line;
+	long int column;
 	// Additional information pertaining to Token here
 } Token;
 
 
-Token *create_token(TokenType, void *);
+Token *create_token(TokenType, long int, long int, void *);
 void print_token(Token *);
 
 #endif

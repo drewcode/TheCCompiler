@@ -11,6 +11,8 @@ typedef struct LexerState {
 	const char *source; // The source file
 	long int start; // The start index of the current lexeme
 	long int current; // The next character to be read from the stream
+	long int line; // The current line number in the source file
+	long int column; // The column within the current line
 } LexerState;
 
 Token *next_token(LexerState *);
@@ -33,6 +35,7 @@ int is_at_end(LexerState *state) {
 
 char advance(LexerState *state) {
 	state->current += 1;
+	(state->column)++;
 	return state->source[state->current - 1];
 }
 
@@ -73,12 +76,12 @@ Token *numeric(LexerState *state) {
 		double *literal = (double *) malloc(sizeof(double));
 		*literal = atof(lexeme);
 		free(lexeme);
-		return create_token(DOUBLE_LITERAL, literal);
+		return create_token(DOUBLE_LITERAL, state->line, state->column, literal);
 	} else {
 		int *literal = (int *) malloc(sizeof(int));
 		*literal = atoi(lexeme);
 		free(lexeme);
-		return create_token(INT_LITERAL, literal);
+		return create_token(INT_LITERAL, state->line, state->column, literal);
 	}
 }
 
@@ -88,24 +91,25 @@ Token *id_or_keyword(LexerState *state) {
 	char *literal = strndup(state->source + state->start, state->current - state->start);
 
 	//TODO: Make this logic more efficient
+	long int column = state->column - strlen(literal) + 1;
 	if(strcmp(literal, "while") == 0) {
-		return create_token(WHILE, literal);
+		return create_token(WHILE, state->line, column, literal);
 	} else if(strcmp(literal, "void") == 0) {
-		return create_token(VOID, literal);
+		return create_token(VOID, state->line, column, literal);
 	} else if(strcmp(literal, "char") == 0) {
-		return create_token(CHAR, literal);
+		return create_token(CHAR, state->line, column, literal);
 	} else if(strcmp(literal, "int") == 0) {
-		return create_token(INT, literal);
+		return create_token(INT, state->line, column, literal);
 	} else if(strcmp(literal, "long") == 0) {
-		return create_token(LONG, literal);
+		return create_token(LONG, state->line, column, literal);
 	} else if(strcmp(literal, "float") == 0) {
-		return create_token(FLOAT, literal);
+		return create_token(FLOAT, state->line, column, literal);
 	} else if(strcmp(literal, "double") == 0) {
-		return create_token(DOUBLE, literal);
+		return create_token(DOUBLE, state->line, column, literal);
 	} else if(strcmp(literal, "return") == 0) {
-		return create_token(RETURN, literal);
+		return create_token(RETURN, state->line, column, literal);
 	} else {
-		return create_token(IDENTIFIER, literal);
+		return create_token(IDENTIFIER, state->line, column, literal);
 	}
 }
 
@@ -114,7 +118,9 @@ vector<Token *> tokenize(const char *source) {
 	LexerState state = {
 		.source = source,
 		.start = 0,
-		.current = 0
+		.current = 0,
+		.line = 1,
+		.column = 0
 	};
 
 	vector<Token *> tokens;
@@ -133,52 +139,56 @@ Token *next_token(LexerState *state) {
 	char c = advance(state);
 	switch(c) {
 		case ';':
-			return create_token(SEMI_COLON, NULL);
+			return create_token(SEMI_COLON, state->line, state->column, NULL);
 			break;
 
 		case ',':
-			return create_token(COMMA, NULL);
+			return create_token(COMMA, state->line, state->column, NULL);
 			break;
 
 		case '(':
-			return create_token(OPEN_PAREN, NULL);
+			return create_token(OPEN_PAREN, state->line, state->column, NULL);
 			break;
 
 		case ')':
-			return create_token(CLOSE_PAREN, NULL);
+			return create_token(CLOSE_PAREN, state->line, state->column, NULL);
 			break;
 
 		case '{':
-			return create_token(OPEN_BRACE, NULL);
+			return create_token(OPEN_BRACE, state->line, state->column, NULL);
 			break;
 
 		case '}':
-			return create_token(CLOSE_BRACE, NULL);
+			return create_token(CLOSE_BRACE, state->line, state->column, NULL);
 			break;
 
 		case '[':
-			return create_token(OPEN_SQUARE, NULL);
+			return create_token(OPEN_SQUARE, state->line, state->column, NULL);
 			break;
 
 		case ']':
-			return create_token(CLOSE_SQUARE, NULL);
+			return create_token(CLOSE_SQUARE, state->line, state->column, NULL);
 			break;
 
 		case '=':
-			return lookahead_match(state, '=') ? create_token(EQUAL_EQUAL, NULL) : create_token(EQUAL, NULL);
+			return lookahead_match(state, '=') ? create_token(EQUAL_EQUAL, state->line, state->column, NULL) : create_token(EQUAL, state->line, state->column, NULL);
 			break;
 
 		case '>':
-			return lookahead_match(state, '=') ? create_token(GREATER_EQUAL, NULL) : create_token(GREATER, NULL);
+			return lookahead_match(state, '=') ? create_token(GREATER_EQUAL, state->line, state->column, NULL) : create_token(GREATER, state->line, state->column, NULL);
 			break;
 
 		case '<':
-			return lookahead_match(state, '=') ? create_token(LESSER_EQUAL, NULL) : create_token(LESSER, NULL);
+			return lookahead_match(state, '=') ? create_token(LESSER_EQUAL, state->line, state->column, NULL) : create_token(LESSER, state->line, state->column, NULL);
 			break;
 
 		case ' ':
 		case '\t':
+			break;
+
 		case '\n':
+			(state->line)++;
+			state->column = 0;
 			break;
 
 		default:

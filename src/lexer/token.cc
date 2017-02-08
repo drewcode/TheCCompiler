@@ -3,19 +3,22 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-Token *create_token(TokenType type, void *literal) {
+Token *create_token(TokenType type, long int line, long int column, void *literal) {
 	Token *token = (Token *) malloc(sizeof(Token));
 	if(token == NULL) {
 		return NULL;
 	}
 
 	token->type = type;
+	token->line = line;
+	token->column = column;
 	token->literal = literal;
 
 	return token;
 }
 
 void print_token(Token *token) {
+	printf("Line: %ld Column: %ld ", token->line, token->column);
 	switch(token->type) {
 		case IDENTIFIER:
 			printf("Identifier: %s\n", (char *)token->literal);
