@@ -71,17 +71,17 @@ Token *numeric(LexerState *state) {
 	while(lookahead_pmatch(state, is_digit));
 
 	char *lexeme = strndup(state->source + state->start, state->current - state->start);
-
+	long int column = state->column - strlen(lexeme) + 1;
 	if(is_real) {
 		double *literal = (double *) malloc(sizeof(double));
 		*literal = atof(lexeme);
 		free(lexeme);
-		return create_token(DOUBLE_LITERAL, state->line, state->column, literal);
+		return create_token(DOUBLE_LITERAL, state->line, column, literal);
 	} else {
 		int *literal = (int *) malloc(sizeof(int));
 		*literal = atoi(lexeme);
 		free(lexeme);
-		return create_token(INT_LITERAL, state->line, state->column, literal);
+		return create_token(INT_LITERAL, state->line, column, literal);
 	}
 }
 
@@ -92,25 +92,32 @@ Token *id_or_keyword(LexerState *state) {
 
 	//TODO: Make this logic more efficient
 	long int column = state->column - strlen(literal) + 1;
+	Token *token = NULL;
 	if(strcmp(literal, "while") == 0) {
-		return create_token(WHILE, state->line, column, literal);
+		token = create_token(WHILE, state->line, column, NULL);
 	} else if(strcmp(literal, "void") == 0) {
-		return create_token(VOID, state->line, column, literal);
+		token = create_token(VOID, state->line, column, NULL);
 	} else if(strcmp(literal, "char") == 0) {
-		return create_token(CHAR, state->line, column, literal);
+		token = create_token(CHAR, state->line, column, NULL);
 	} else if(strcmp(literal, "int") == 0) {
-		return create_token(INT, state->line, column, literal);
+		token = create_token(INT, state->line, column, NULL);
 	} else if(strcmp(literal, "long") == 0) {
-		return create_token(LONG, state->line, column, literal);
+		token = create_token(LONG, state->line, column, NULL);
 	} else if(strcmp(literal, "float") == 0) {
-		return create_token(FLOAT, state->line, column, literal);
+		token = create_token(FLOAT, state->line, column, NULL);
 	} else if(strcmp(literal, "double") == 0) {
-		return create_token(DOUBLE, state->line, column, literal);
+		token = create_token(DOUBLE, state->line, column, NULL);
 	} else if(strcmp(literal, "return") == 0) {
-		return create_token(RETURN, state->line, column, literal);
-	} else {
-		return create_token(IDENTIFIER, state->line, column, literal);
+		token = create_token(RETURN, state->line, column, NULL);
 	}
+
+	if(token == NULL) {
+		token = create_token(IDENTIFIER, state->line, column, literal);
+	} else {
+		free(literal);
+	}
+
+	return token;
 }
 
 vector<Token *> tokenize(const char *source) {

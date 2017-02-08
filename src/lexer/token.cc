@@ -58,14 +58,28 @@ void print_token(Token *token) {
 			break;
 
 		case WHILE:
+			printf("Keyword: while\n");
+			break;
 		case VOID:
+			printf("Keyword: void\n");
+			break;
 		case CHAR:
+			printf("Keyword: char\n");
+			break;
 		case INT:
+			printf("Keyword: int\n");
+			break;
 		case LONG:
+			printf("Keyword: long\n");
+			break;
 		case DOUBLE:
+			printf("Keyword: double\n");
+			break;
 		case FLOAT:
+			printf("Keyword: float\n");
+			break;
 		case RETURN:
-			printf("Keyword: %s\n", (char *)token->literal);
+			printf("Keyword: return\n");
 			break;
 
 		case INT_LITERAL:
