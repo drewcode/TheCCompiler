@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-Token *create_token(TokenType type, long int line, long int column, void *literal, int entry) {
+Token *create_token(TokenType type, long int line, long int column, LiteralType ltype, void *literal, int entry) {
 	Token *token = (Token *) malloc(sizeof(Token));
 	if(token == NULL) {
 		return NULL;
@@ -12,6 +12,7 @@ Token *create_token(TokenType type, long int line, long int column, void *litera
 	token->type = type;
 	token->line = line;
 	token->column = column;
+	token->ltype = ltype;
 	token->literal = literal;
 	token->entry  = entry;
 
@@ -83,12 +84,12 @@ void print_token(Token *token) {
 			printf("Keyword: return\n");
 			break;
 
-		case INT_LITERAL:
-			printf("Integer Literal: %d\n", *((int *)token->literal));
-			break;
-
-		case DOUBLE_LITERAL:
-			printf("Double Literal: %f\n", *((double *)token->literal));
+		case LITERAL:
+			if(token->ltype == L_INT) {
+				printf("Integer Literal: %d\n", *((int *)token->literal));
+			} else if(token->ltype == L_DOUBLE) {
+				printf("Double Literal: %f\n", *((double *)token->literal));
+			}
 			break;
 
 		default:

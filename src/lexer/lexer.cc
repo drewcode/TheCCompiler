@@ -79,12 +79,12 @@ Token *numeric(LexerState *state) {
 		double *literal = (double *) malloc(sizeof(double));
 		*literal = atof(lexeme);
 		free(lexeme);
-		return create_token(DOUBLE_LITERAL, state->line, column, literal, -1);
+		return create_token(LITERAL, state->line, column, L_DOUBLE, literal, -1);
 	} else {
 		int *literal = (int *) malloc(sizeof(int));
 		*literal = atoi(lexeme);
 		free(lexeme);
-		return create_token(INT_LITERAL, state->line, column, literal, -1);
+		return create_token(LITERAL, state->line, column, L_INT, literal, -1);
 	}
 }
 
@@ -97,28 +97,28 @@ Token *id_or_keyword(LexerState *state) {
 	long int column = state->column - strlen(literal) + 1;
 	Token *token = NULL;
 	if(strcmp(literal, "while") == 0) {
-		token = create_token(WHILE, state->line, column, NULL, -1);
+		token = create_token(WHILE, state->line, column, (LiteralType) -1, NULL, -1);
 	} else if(strcmp(literal, "void") == 0) {
-		token = create_token(VOID, state->line, column, NULL, -1);
+		token = create_token(VOID, state->line, column, (LiteralType) -1,  NULL, -1);
 	} else if(strcmp(literal, "char") == 0) {
-		token = create_token(CHAR, state->line, column, NULL, -1);
+		token = create_token(CHAR, state->line, column, (LiteralType) -1,  NULL, -1);
 	} else if(strcmp(literal, "int") == 0) {
-		token = create_token(INT, state->line, column, NULL, -1);
+		token = create_token(INT, state->line, column, (LiteralType) -1,  NULL, -1);
 	} else if(strcmp(literal, "long") == 0) {
-		token = create_token(LONG, state->line, column, NULL, -1);
+		token = create_token(LONG, state->line, column, (LiteralType) -1,  NULL, -1);
 	} else if(strcmp(literal, "float") == 0) {
-		token = create_token(FLOAT, state->line, column, NULL, -1);
+		token = create_token(FLOAT, state->line, column, (LiteralType) -1,  NULL, -1);
 	} else if(strcmp(literal, "double") == 0) {
-		token = create_token(DOUBLE, state->line, column, NULL, -1);
+		token = create_token(DOUBLE, state->line, column, (LiteralType) -1,  NULL, -1);
 	} else if(strcmp(literal, "return") == 0) {
-		token = create_token(RETURN, state->line, column, NULL, -1);
+		token = create_token(RETURN, state->line, column, (LiteralType) -1,  NULL, -1);
 	}
 
 	if(token == NULL) {
 		int entry = insertSymbol(state->symbol_table, literal);
-		token = create_token(IDENTIFIER, state->line, column, NULL, entry);
+		token = create_token(IDENTIFIER, state->line, column, (LiteralType) -1,  NULL, entry);
 	}
-	
+
 	free(literal);
 	return token;
 }
@@ -150,47 +150,47 @@ Token *next_token(LexerState *state) {
 	char c = advance(state);
 	switch(c) {
 		case ';':
-			return create_token(SEMI_COLON, state->line, state->column, NULL, -1);
+			return create_token(SEMI_COLON, state->line, state->column, (LiteralType) -1,  NULL, -1);
 			break;
 
 		case ',':
-			return create_token(COMMA, state->line, state->column, NULL, -1);
+			return create_token(COMMA, state->line, state->column, (LiteralType) -1, NULL, -1);
 			break;
 
 		case '(':
-			return create_token(OPEN_PAREN, state->line, state->column, NULL, -1);
+			return create_token(OPEN_PAREN, state->line, state->column, (LiteralType) -1,  NULL, -1);
 			break;
 
 		case ')':
-			return create_token(CLOSE_PAREN, state->line, state->column, NULL, -1);
+			return create_token(CLOSE_PAREN, state->line, state->column, (LiteralType) -1,  NULL, -1);
 			break;
 
 		case '{':
-			return create_token(OPEN_BRACE, state->line, state->column, NULL, -1);
+			return create_token(OPEN_BRACE, state->line, state->column, (LiteralType) -1,  NULL, -1);
 			break;
 
 		case '}':
-			return create_token(CLOSE_BRACE, state->line, state->column, NULL, -1);
+			return create_token(CLOSE_BRACE, state->line, state->column, (LiteralType) -1, NULL, -1);
 			break;
 
 		case '[':
-			return create_token(OPEN_SQUARE, state->line, state->column, NULL, -1);
+			return create_token(OPEN_SQUARE, state->line, state->column, (LiteralType) -1, NULL, -1);
 			break;
 
 		case ']':
-			return create_token(CLOSE_SQUARE, state->line, state->column, NULL, -1);
+			return create_token(CLOSE_SQUARE, state->line, state->column, (LiteralType) -1, NULL, -1);
 			break;
 
 		case '=':
-			return lookahead_match(state, '=') ? create_token(EQUAL_EQUAL, state->line, state->column, NULL, -1) : create_token(EQUAL, state->line, state->column, NULL, -1);
+			return lookahead_match(state, '=') ? create_token(EQUAL_EQUAL, state->line, state->column, (LiteralType) -1,  NULL, -1) : create_token(EQUAL, state->line, state->column, (LiteralType) -1, NULL, -1);
 			break;
 
 		case '>':
-			return lookahead_match(state, '=') ? create_token(GREATER_EQUAL, state->line, state->column, NULL, -1) : create_token(GREATER, state->line, state->column, NULL, -1);
+			return lookahead_match(state, '=') ? create_token(GREATER_EQUAL, state->line, state->column, (LiteralType) -1,  NULL, -1) : create_token(GREATER, state->line, state->column, (LiteralType) -1, NULL, -1);
 			break;
 
 		case '<':
-			return lookahead_match(state, '=') ? create_token(LESSER_EQUAL, state->line, state->column, NULL, -1) : create_token(LESSER, state->line, state->column, NULL, -1);
+			return lookahead_match(state, '=') ? create_token(LESSER_EQUAL, state->line, state->column, (LiteralType) -1,  NULL, -1) : create_token(LESSER, state->line, state->column, (LiteralType) -1,  NULL, -1);
 			break;
 
 		case ' ':

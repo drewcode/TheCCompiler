@@ -1,10 +1,18 @@
 #ifndef CCOMPILER_TOKENS_H
 #define CCOMPILER_TOKENS_H
 
+typedef enum LiteralType {
+	L_CHAR,
+	L_INT,
+	L_FLOAT,
+	L_DOUBLE,
+	L_LONG,
+	L_STRING
+} LiteralType;
+
 typedef enum TokenType {
 	// Literals
-	INT_LITERAL,
-	DOUBLE_LITERAL,
+	LITERAL,
 
 	IDENTIFIER,
 
@@ -42,13 +50,14 @@ typedef struct Token {
 	TokenType type;
 	long int line;
 	long int column;
+	LiteralType ltype;
 	void *literal;
 	int entry;
 	// Additional information pertaining to Token here
 } Token;
 
 
-Token *create_token(TokenType, long int, long int, void *, int);
+Token *create_token(TokenType, long int, long int,  LiteralType, void *, int);
 void print_token(Token *);
 
 #endif
