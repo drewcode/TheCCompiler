@@ -34,6 +34,9 @@ void print_token(Token *token) {
 			printf("Comma\n");
 			break;
 
+		case EQUAL:
+			printf("Equal\n");
+			break;
 
 		case OPEN_BRACE:
 			printf("Open Braces\n");
@@ -89,6 +92,8 @@ void print_token(Token *token) {
 				printf("Integer Literal: %d\n", *((int *)token->literal));
 			} else if(token->ltype == L_DOUBLE) {
 				printf("Double Literal: %f\n", *((double *)token->literal));
+			} else if(token->ltype == L_CHAR) {
+				printf("Character Literal: '%c'\n", *((char *)token->literal));
 			}
 			break;
 

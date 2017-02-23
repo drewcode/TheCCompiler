@@ -64,7 +64,15 @@ int lookahead_pmatch(LexerState *state, char_pred predicate) {
 	}
 }
 
-Token *numeric(LexerState *state) {
+Token *character_literal(LexerState *state) {
+	char *literal = (char *) malloc(sizeof(char));
+	char lexeme = advance(state);
+	advance(state);
+	*literal = lexeme;
+	return create_token(LITERAL, state->line, state->column - 2, L_CHAR, literal, -1);
+}
+
+Token *numeric_literal(LexerState *state) {
 	int is_real = 0;
 
 	while(lookahead_pmatch(state, is_digit));
@@ -149,6 +157,9 @@ vector<Token *> tokenize(const char *source, SymbolTable *table) {
 Token *next_token(LexerState *state) {
 	char c = advance(state);
 	switch(c) {
+		case '\'':
+			return character_literal(state);
+			break;
 		case ';':
 			return create_token(SEMI_COLON, state->line, state->column, (LiteralType) -1,  NULL, -1);
 			break;
@@ -204,7 +215,7 @@ Token *next_token(LexerState *state) {
 
 		default:
 			if(is_digit(c)) {
-				return numeric(state);
+				return numeric_literal(state);
 			} else if(is_alpha(c)) {
 				return id_or_keyword(state);
 			}
