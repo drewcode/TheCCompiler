@@ -1,0 +1,28 @@
+21
+Line: 1 Column: 1 Keyword: int
+Line: 1 Column: 5 Identifier: 0
+Line: 1 Column: 9 Open Parenthesis
+Line: 1 Column: 10 Keyword: int
+Line: 1 Column: 14 Identifier: 1
+Line: 1 Column: 18 Comma
+Line: 1 Column: 20 Keyword: char
+Line: 1 Column: 25 Identifier: 2
+Line: 1 Column: 29 Open Square Brackets
+Line: 1 Column: 30 Close Square Brackets
+Line: 1 Column: 31 Close Parenthesis
+Line: 1 Column: 33 Open Braces
+Line: 2 Column: 2 Identifier: 3
+Line: 2 Column: 8 Open Parenthesis
+Line: 2 Column: 9 Identifier: 1
+Line: 2 Column: 13 Close Parenthesis
+Line: 2 Column: 14 Semi Colon
+Line: 4 Column: 2 Keyword: return
+Line: 4 Column: 9 Integer Literal: 1
+Line: 4 Column: 10 Semi Colon
+Line: 5 Column: 1 Close Braces
+
+Symbol Table
+0 main
+1 argc
+2 argv
+3 printf
