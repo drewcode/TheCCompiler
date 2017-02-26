@@ -93,7 +93,7 @@ void print_token(Token *token) {
 			} else if(token->ltype == L_DOUBLE) {
 				printf("Double Literal: %f\n", *((double *)token->literal));
 			} else if(token->ltype == L_CHAR) {
-				printf("Character Literal: '%c'\n", *((char *)token->literal));
+				printf("Character Literal: '(char)%d'\n", *((char *)token->literal));
 			}
 			break;
 

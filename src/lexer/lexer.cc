@@ -67,9 +67,44 @@ int lookahead_pmatch(LexerState *state, char_pred predicate) {
 Token *character_literal(LexerState *state) {
 	char *literal = (char *) malloc(sizeof(char));
 	char lexeme = advance(state);
-	advance(state);
-	*literal = lexeme;
-	return create_token(LITERAL, state->line, state->column - 2, L_CHAR, literal, -1);
+	if(lexeme == '\\') {
+
+		lexeme = advance(state);
+		switch(lexeme) {
+			case 'a':
+				*literal = '\a';
+				break;
+			case 'b':
+				*literal = '\b';
+				break;
+			case 'f':
+				*literal = '\f';
+				break;
+			case 'n':
+				*literal = '\n';
+				break;
+			case 'r':
+				*literal = '\r';
+				break;
+			case 't':
+				*literal = '\t';
+				break;
+			case 'v':
+				*literal = '\v';
+				break;
+			case '0':
+				*literal = '\0';
+				break;
+		}
+		advance(state);
+		return create_token(LITERAL, state->line, state->column - 3, L_CHAR, literal, -1);
+	} else {
+		advance(state);
+		*literal = lexeme;
+		return create_token(LITERAL, state->line, state->column - 2, L_CHAR, literal, -1);
+	}
+
+
 }
 
 Token *numeric_literal(LexerState *state) {

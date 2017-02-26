@@ -1,4 +1,4 @@
-21
+25
 Line: 1 Column: 1 Keyword: int
 Line: 1 Column: 5 Identifier: 0
 Line: 1 Column: 9 Open Parenthesis
@@ -14,8 +14,12 @@ Line: 1 Column: 33 Open Braces
 Line: 2 Column: 2 Keyword: char
 Line: 2 Column: 7 Identifier: 3
 Line: 2 Column: 9 Equal
-Line: 2 Column: 11 Character Literal: 'a'
-Line: 2 Column: 14 Semi Colon
+Line: 2 Column: 11 Character Literal: '(char)97'
+Line: 2 Column: 14 Comma
+Line: 2 Column: 16 Identifier: 4
+Line: 2 Column: 18 Equal
+Line: 2 Column: 20 Character Literal: '(char)0'
+Line: 2 Column: 24 Semi Colon
 Line: 3 Column: 2 Keyword: return
 Line: 3 Column: 9 Integer Literal: 0
 Line: 3 Column: 10 Semi Colon
@@ -26,3 +30,4 @@ Symbol Table
 1 argc
 2 argv
 3 c
+4 d
