@@ -22,6 +22,9 @@ Token *create_token(TokenType type, long int line, long int column, LiteralType 
 void print_token(Token *token) {
 	printf("Line: %ld Column: %ld ", token->line, token->column);
 	switch(token->type) {
+		case TEOF:
+			printf("EOF\n");
+			break;
 		case IDENTIFIER:
 			printf("Identifier: %d\n", token->entry);
 			break;

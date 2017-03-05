@@ -185,6 +185,7 @@ vector<Token *> tokenize(const char *source, SymbolTable *table) {
 			tokens.push_back(token);
 		}
 	}
+	tokens.push_back(create_token(TEOF, state.line, state.column, (LiteralType) -1,  NULL, -1));
 
 	return tokens;
 }

@@ -1,4 +1,4 @@
-21
+22
 Line: 1 Column: 1 Keyword: int
 Line: 1 Column: 5 Identifier: 0
 Line: 1 Column: 9 Open Parenthesis
@@ -20,6 +20,7 @@ Line: 4 Column: 2 Keyword: return
 Line: 4 Column: 9 Integer Literal: 1
 Line: 4 Column: 10 Semi Colon
 Line: 5 Column: 1 Close Braces
+Line: 6 Column: 0 EOF
 
 Symbol Table
 0 main

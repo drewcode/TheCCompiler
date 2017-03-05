@@ -11,6 +11,8 @@ typedef enum LiteralType {
 } LiteralType;
 
 typedef enum TokenType {
+	TEOF,
+
 	// Literals
 	LITERAL,
 
