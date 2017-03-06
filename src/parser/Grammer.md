@@ -8,8 +8,8 @@ Program -> FunctionDeclaration Program
 
 FunctionDeclaration -> FunctionReturnType IDENTIFIER OPEN_PAREN FunctionDeclarationParameterListStart CLOSE_PAREN SEMI_COLON
 FunctionReturnType -> VOID | CHAR | INT | DOUBLE
-FunctionDeclarationParameterListStart -> ParameterDataType IDENTIFIER FunctionDeclarationParameterListMore | epsilon
-FunctionDeclarationParameterListMore -> COMMA ParameterDataType IDENTIFIER FunctionDeclarationParameterListMore | epsilon
+FunctionDeclarationParameterListStart -> ParameterDataType IDENTIFIER FunctionDeclarationParameterListMore | ParameterDataType FunctionDeclarationParameterListMore | epsilon
+FunctionDeclarationParameterListMore -> COMMA ParameterDataType IDENTIFIER FunctionDeclarationParameterListMore | COMMA ParameterDataType FunctionDeclarationParameterListMore | epsilon
 ParameterDataType -> CHAR | INT | DOUBLE
 ```
 
@@ -28,8 +28,13 @@ FunctionReturnType -> VOID | CHAR | INT | DOUBLE
 FunctionDeclarationParameterListStart -> CHAR IDENTIFIER FunctionDeclarationParameterListMore
                                        | INT IDENTIFIER FunctionDeclarationParameterListMore
                                        | DOUBLE IDENTIFIER FunctionDeclarationParameterListMore
+                                       | CHAR FunctionDeclarationParameterListMore
+                                       | INT FunctionDeclarationParameterListMore
+                                       | DOUBLE FunctionDeclarationParameterListMore
                                        | epsilon
-FunctionDeclarationParameterListMore -> COMMA ParameterDataType IDENTIFIER FunctionDeclarationParameterListMore | epsilon
+FunctionDeclarationParameterListMore -> COMMA ParameterDataType IDENTIFIER FunctionDeclarationParameterListMore
+                                      | COMMA ParameterDataType FunctionDeclarationParameterListMore
+                                      | epsilon
 ParameterDataType -> CHAR | INT | DOUBLE
 
 ```

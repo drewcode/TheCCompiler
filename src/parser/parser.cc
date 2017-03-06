@@ -68,26 +68,26 @@ void parseProgram(ParserState *state) {
                         if(get_token(SEMI_COLON, state)) {
                             parseProgram(state);
                         } else {
-                            printf("Error: Expected ;\n");
+                            printf("(Near %ld:%ld) Error: Expected ;\n", state->tokens[(state->current_token)]->line, state->tokens[(state->current_token)]->column);
                             errord(state);
                         }
                     } else {
-                        printf("Error: Expected )\n");
+                        printf("(Near %ld:%ld) Error: Expected )\n", state->tokens[(state->current_token)]->line, state->tokens[(state->current_token)]->column);
                         errord(state);
                     }
                 }
             } else {
-                printf("Error: Expected (\n");
+                printf("(Near %ld:%ld) Error: Expected (\n", state->tokens[(state->current_token)]->line, state->tokens[(state->current_token)]->column);
                 errord(state);
             }
         } else {
-            printf("Error: Expected Identifier\n");
+            printf("(Near %ld:%ld) Error: Expected Identifier\n", state->tokens[(state->current_token)]->line, state->tokens[(state->current_token)]->column);
             errord(state);
         }
     } else if(get_token(TEOF, state)) {
 
     } else {
-        printf("Error: Expected Return Type\n");
+        printf("(Near %ld:%ld) Error: Expected Return Type\n", state->tokens[(state->current_token)]->line, state->tokens[(state->current_token)]->column);
         errord(state);
     }
 }
@@ -100,8 +100,7 @@ void parseFunctionDeclarationParameterListStart(ParserState *state) {
         if(get_token(IDENTIFIER, state)) {
             parseFunctionDeclarationParameterListMore(state);
         } else {
-            printf("Error: Expected Identifier\n");
-            errord(state);
+            parseFunctionDeclarationParameterListMore(state);
         }
     } else {
         // epsilon
@@ -115,8 +114,7 @@ void parseFunctionDeclarationParameterListMore(ParserState *state) {
             if(get_token(IDENTIFIER, state)) {
                 parseFunctionDeclarationParameterListMore(state);
             } else {
-                printf("Error: Expected Identifier\n");
-                errord(state);
+                parseFunctionDeclarationParameterListMore(state);
             }
         }
     } else {
@@ -131,7 +129,7 @@ void parseParameterDataType(ParserState *state) {
     ) {
 
     } else {
-        printf("Error: Expected Data Type\n");
+        printf("(Near %ld:%ld) Error: Expected Data Type\n", state->tokens[(state->current_token)]->line, state->tokens[(state->current_token)]->column);
         errord(state);
     }
 }
