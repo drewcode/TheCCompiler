@@ -1,4 +1,4 @@
-##The current grammer implemented by the parser
+## The current grammer implemented by the parser
 ```
 Program --> Vardecl Program | int main() { Stmtlist }
 
