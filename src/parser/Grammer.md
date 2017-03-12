@@ -1,5 +1,5 @@
 ##The current grammer implemented by the parser
-
+```
 Program --> Vardecl Program | int main() { Stmtlist }
 
 Vardecl 	-->	Vartype Decl ; 
@@ -37,4 +37,4 @@ Expr7	-->	LITERAL | ID | (Expr1)
 
 Stml --> ; | Expr ; | Vardecl | while ( Expr ) { Stmtlist } | return Expr ;
 Stmtlist --> Stmt Stmtlist | ep
-
+```
