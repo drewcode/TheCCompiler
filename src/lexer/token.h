@@ -46,6 +46,10 @@ typedef enum TokenType {
 	LESSER,
 	LESSER_EQUAL,
 	NOT_EQUAL,
+	PLUS,
+	MINUS,
+	STAR,
+	SLASH
 } TokenType;
 
 typedef struct Token {
