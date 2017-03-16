@@ -41,6 +41,21 @@ void print_token(Token *token) {
 			printf("Equal\n");
 			break;
 
+		case PLUS:
+			printf("Plus\n");
+			break;
+
+		case MINUS:
+			printf("Minus\n");
+			break;
+
+		case SLASH:
+			printf("Slash\n");
+			break;
+
+		case STAR:
+			printf("Star\n");
+			break;
 		case OPEN_BRACE:
 			printf("Open Braces\n");
 			break;

@@ -1,5 +1,6 @@
 #include "lexer.h"
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -30,8 +31,8 @@ int is_alphanum(char c) {
 	return is_digit(c) || is_alpha(c);
 }
 
-int is_at_end(LexerState *state) {
-	return state->source[state->current] == '\0';
+int is_at_end(char c) {
+	return c == '\0';
 }
 
 char advance(LexerState *state) {
@@ -140,25 +141,25 @@ Token *id_or_keyword(LexerState *state) {
 	TokenType tokentype_holder;
 	bool is_id = false;
 	switch(literal[0]) {
-		case 'w' : strcmp(literal, "while") == 0 ? tokentype_holder = WHILE : is_id = true;	
+		case 'w' : strcmp(literal, "while") == 0 ? tokentype_holder = WHILE : is_id = true;
 				break;
-		case 'v' : strcmp(literal, "void") == 0 ? tokentype_holder = VOID : is_id = true;	
+		case 'v' : strcmp(literal, "void") == 0 ? tokentype_holder = VOID : is_id = true;
 				break;
-		case 'c' : strcmp(literal, "char") == 0 ? tokentype_holder = CHAR : is_id = true;	
+		case 'c' : strcmp(literal, "char") == 0 ? tokentype_holder = CHAR : is_id = true;
 				break;
-		case 'i' : strcmp(literal, "int") == 0 ? tokentype_holder = INT : is_id = true;	
+		case 'i' : strcmp(literal, "int") == 0 ? tokentype_holder = INT : is_id = true;
 				break;
-		case 'l' : strcmp(literal, "long") == 0 ? tokentype_holder = LONG : is_id = true;	
+		case 'l' : strcmp(literal, "long") == 0 ? tokentype_holder = LONG : is_id = true;
 				break;
-		case 'f' : strcmp(literal, "float") == 0 ? tokentype_holder = FLOAT : is_id = true;	
+		case 'f' : strcmp(literal, "float") == 0 ? tokentype_holder = FLOAT : is_id = true;
 				break;
-		case 'd' : strcmp(literal, "double") == 0 ? tokentype_holder = DOUBLE : is_id = true;	
+		case 'd' : strcmp(literal, "double") == 0 ? tokentype_holder = DOUBLE : is_id = true;
 				break;
-		case 'r' : strcmp(literal, "return") == 0 ? tokentype_holder = RETURN : is_id = true;	
+		case 'r' : strcmp(literal, "return") == 0 ? tokentype_holder = RETURN : is_id = true;
 				break;
 		default : is_id = true;
 	}
-	
+
 	if(is_id == false) {
 		token = create_token(tokentype_holder, state->line, column, (LiteralType) -1,  NULL, -1);
 	} else {
@@ -182,7 +183,7 @@ vector<Token *> tokenize(const char *source, SymbolTable *table) {
 	};
 
 	vector<Token *> tokens;
-	while(!is_at_end(&state)) {
+	while(!lookahead_pmatch(&state, is_at_end)) {
 		state.start = state.current;
 		Token* token = next_token(&state);
 		if(token != NULL) {
@@ -245,16 +246,24 @@ Token *next_token(LexerState *state) {
 			return lookahead_match(state, '=') ? create_token(LESSER_EQUAL, state->line, state->column, (LiteralType) -1,  NULL, -1) : create_token(LESSER, state->line, state->column, (LiteralType) -1,  NULL, -1);
 			break;
 
+		case '&':
+			return lookahead_match(state, '&') ? create_token(AND, state->line, state->column, (LiteralType) -1, NULL, -1) : NULL;
+			break;
+
+		case '|':
+			return lookahead_match(state, '|') ? create_token(OR, state->line, state->column, (LiteralType) -1, NULL, -1) : NULL;
+			break;
+
 		case '+':
-			create_token(PLUS, state->line, state->column, (LiteralType) -1,  NULL, -1);
+			return create_token(PLUS, state->line, state->column, (LiteralType) -1,  NULL, -1);
 			break;
 
 		case '-':
-			create_token(MINUS, state->line, state->column, (LiteralType) -1,  NULL, -1);
+			return create_token(MINUS, state->line, state->column, (LiteralType) -1,  NULL, -1);
 			break;
 
 		case '*':
-			create_token(STAR, state->line, state->column, (LiteralType) -1,  NULL, -1);
+			return create_token(STAR, state->line, state->column, (LiteralType) -1,  NULL, -1);
 			break;
 
 		case '/':

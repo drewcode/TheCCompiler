@@ -21,6 +21,10 @@ echo "2) Parser"
 diff parser/inputs/eop parser/inputs/op1
 rm parser/inputs/op1
 
+./parser/test_parser parser/inputs/ip2.c > parser/inputs/op2
+diff parser/inputs/eop parser/inputs/op2
+rm parser/inputs/op2
+
 echo "Parser Tests Successful"
 
 echo "Passed"

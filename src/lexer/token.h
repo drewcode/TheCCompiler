@@ -49,7 +49,9 @@ typedef enum TokenType {
 	PLUS,
 	MINUS,
 	STAR,
-	SLASH
+	SLASH,
+	AND,
+	OR
 } TokenType;
 
 typedef struct Token {

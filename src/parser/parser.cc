@@ -138,7 +138,6 @@ void parseProgram(ParserState *state) {
 }
 
 void parseVarDecl(ParserState *state) {
-
 	parseVarType(state);
 	if(state->errord) {
 		return;
@@ -202,7 +201,10 @@ void parseDeclCond2(ParserState *state) {
 void parseExpr(ParserState *state) {
 	if(get_token(IDENTIFIER, state)) {
 		if(get_token(EQUAL, state)) {
-			parseExpr7(state);
+			parseExpr1(state);
+			if(state->errord) {
+				return;
+			}
 		} else {
 			// error
 			printf("Error: Expected =\n");
@@ -210,6 +212,7 @@ void parseExpr(ParserState *state) {
 		}
 	} else {
 		// error
+		printf("Error: Expected Identifier\n");
 		state->errord = 1;
 	}
 }
@@ -310,6 +313,7 @@ void parseExpr4(ParserState *state) {
 void parseExpr4P(ParserState *state) {
 	if(get_token(GREATER_EQUAL, state) || get_token(LESSER_EQUAL, state)
 	|| get_token(GREATER, state) || get_token(LESSER, state)) {
+
 		parseExpr5(state);
 		if(state->errord) {
 			return;
@@ -363,7 +367,7 @@ void parseExpr6(ParserState *state) {
 	}
 }
 void parseExpr6P(ParserState *state) {
-	if(get_token(TIMES, state) || get_token(SLASH, state)) {
+	if(get_token(STAR, state) || get_token(SLASH, state)) {
 		parseExpr7(state);
 		if(state->errord) {
 			return;
@@ -396,7 +400,11 @@ void parseStmt(ParserState *state) {
 	} else if(is_token(CHAR, state) || is_token(INT, state) || is_token(DOUBLE, state)) {
 		parseVarDecl(state);
 	} else if(is_token(IDENTIFIER, state)) {
+
 		parseExpr(state);
+		if(state->errord) {
+			return;
+		}
 		if(get_token(SEMI_COLON, state)) {
 
 		} else {
@@ -406,7 +414,7 @@ void parseStmt(ParserState *state) {
 		}
 
 	} else if(get_token(RETURN, state)) {
-		parseExpr7(state);
+		parseExpr1(state);
 		if(get_token(SEMI_COLON, state)) {
 
 		} else {
@@ -417,7 +425,7 @@ void parseStmt(ParserState *state) {
 	} else if(get_token(WHILE, state)) {
 		if(get_token(OPEN_PAREN, state)) {
 
-			parseExpr7(state);
+			parseExpr1(state);
 			if(state->errord == 1) {
 				return ;
 			}
@@ -457,12 +465,12 @@ void parseStmt(ParserState *state) {
 		}
 	} else {
 		// error
+		printf("Error: OMG WTF\n");
+		state->errord = 1;
 	}
 }
 
 void parseStmtList(ParserState *state) {
-	parseStmt(state);
-
 	if(is_token(CHAR, state) || is_token(INT, state) || is_token(DOUBLE, state) || is_token(SEMI_COLON, state)
 		|| is_token(WHILE, state) || is_token(IDENTIFIER, state) || is_token(RETURN, state)) {
 		parseStmt(state);

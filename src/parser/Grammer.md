@@ -17,7 +17,7 @@ Expr1'	-->	|| Expr2 Expr1' | ep
 Expr2	-->	Expr3 Expr2'
 Expr2'	-->	&& Expr3 Expr2' | ep
 
-Expr3	-->	Expr3contd Expr3'
+Expr3	-->	Expr4 Expr3'
 Expr3'	-->	Expr3contd Expr3' | ep
 Expr3contd	-->	== Expr4 | != Expr4
 
@@ -26,7 +26,7 @@ Expr4'	-->	Relop Expr5 Expr4' | ep
 Relop	-->	> | < | >= | <=
 
 Expr5	-->	Expr5contd Expr5'
-Expr5'	-->	Expr5contd Expr5ss' | ep
+Expr5'	-->	Expr5contd Expr5' | ep
 Expr5contd	-->	+ Expr6 | - Expr6
 
 Expr6	-->	Expr6contd Expr6'

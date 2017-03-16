@@ -24,7 +24,7 @@ Line: 3 Column: 2 Keyword: return
 Line: 3 Column: 9 Integer Literal: 0
 Line: 3 Column: 10 Semi Colon
 Line: 4 Column: 1 Close Braces
-Line: 5 Column: 0 EOF
+Line: 5 Column: 1 EOF
 
 Symbol Table
 0 main

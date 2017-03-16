@@ -20,7 +20,7 @@ Line: 4 Column: 2 Keyword: return
 Line: 4 Column: 9 Integer Literal: 1
 Line: 4 Column: 10 Semi Colon
 Line: 5 Column: 1 Close Braces
-Line: 6 Column: 0 EOF
+Line: 6 Column: 1 EOF
 
 Symbol Table
 0 main
