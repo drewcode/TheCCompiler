@@ -1,9 +1,4 @@
-#include "../lexer/token.h"
-#include "../symbol_table/sym_tab.h"
 #include "parser.h"
-
-#include <stdio.h>
-#include <vector>
 
 using std::vector;
 
