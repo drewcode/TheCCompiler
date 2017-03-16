@@ -1,7 +1,5 @@
-#include "token.h"
-#include "../symbol_table/sym_tab.h"
+#include "lexer.h"
 
-#include <vector>
 #include <stdlib.h>
 #include <string.h>
 
@@ -111,6 +109,7 @@ Token *numeric_literal(LexerState *state) {
 	int is_real = 0;
 
 	while(lookahead_pmatch(state, is_digit));
+
 	if(lookahead_match(state, '.')) {
 		is_real = 1;
 	}
@@ -136,28 +135,33 @@ Token *id_or_keyword(LexerState *state) {
 
 	char *literal = strndup(state->source + state->start, state->current - state->start);
 
-	//TODO: Make this logic more efficient
 	long int column = state->column - strlen(literal) + 1;
 	Token *token = NULL;
-	if(strcmp(literal, "while") == 0) {
-		token = create_token(WHILE, state->line, column, (LiteralType) -1, NULL, -1);
-	} else if(strcmp(literal, "void") == 0) {
-		token = create_token(VOID, state->line, column, (LiteralType) -1,  NULL, -1);
-	} else if(strcmp(literal, "char") == 0) {
-		token = create_token(CHAR, state->line, column, (LiteralType) -1,  NULL, -1);
-	} else if(strcmp(literal, "int") == 0) {
-		token = create_token(INT, state->line, column, (LiteralType) -1,  NULL, -1);
-	} else if(strcmp(literal, "long") == 0) {
-		token = create_token(LONG, state->line, column, (LiteralType) -1,  NULL, -1);
-	} else if(strcmp(literal, "float") == 0) {
-		token = create_token(FLOAT, state->line, column, (LiteralType) -1,  NULL, -1);
-	} else if(strcmp(literal, "double") == 0) {
-		token = create_token(DOUBLE, state->line, column, (LiteralType) -1,  NULL, -1);
-	} else if(strcmp(literal, "return") == 0) {
-		token = create_token(RETURN, state->line, column, (LiteralType) -1,  NULL, -1);
+	TokenType tokentype_holder;
+	bool is_id = false;
+	switch(literal[0]) {
+		case 'w' : strcmp(literal, "while") == 0 ? tokentype_holder = WHILE : is_id = true;	
+				break;
+		case 'v' : strcmp(literal, "void") == 0 ? tokentype_holder = VOID : is_id = true;	
+				break;
+		case 'c' : strcmp(literal, "char") == 0 ? tokentype_holder = CHAR : is_id = true;	
+				break;
+		case 'i' : strcmp(literal, "int") == 0 ? tokentype_holder = INT : is_id = true;	
+				break;
+		case 'l' : strcmp(literal, "long") == 0 ? tokentype_holder = LONG : is_id = true;	
+				break;
+		case 'f' : strcmp(literal, "float") == 0 ? tokentype_holder = FLOAT : is_id = true;	
+				break;
+		case 'd' : strcmp(literal, "double") == 0 ? tokentype_holder = DOUBLE : is_id = true;	
+				break;
+		case 'r' : strcmp(literal, "return") == 0 ? tokentype_holder = RETURN : is_id = true;	
+				break;
+		default : is_id = true;
 	}
-
-	if(token == NULL) {
+	
+	if(is_id == false) {
+		token = create_token(tokentype_holder, state->line, column, (LiteralType) -1,  NULL, -1);
+	} else {
 		int entry = insertSymbol(state->symbol_table, literal);
 		token = create_token(IDENTIFIER, state->line, column, (LiteralType) -1,  NULL, entry);
 	}
@@ -196,6 +200,7 @@ Token *next_token(LexerState *state) {
 		case '\'':
 			return character_literal(state);
 			break;
+
 		case ';':
 			return create_token(SEMI_COLON, state->line, state->column, (LiteralType) -1,  NULL, -1);
 			break;
@@ -238,6 +243,36 @@ Token *next_token(LexerState *state) {
 
 		case '<':
 			return lookahead_match(state, '=') ? create_token(LESSER_EQUAL, state->line, state->column, (LiteralType) -1,  NULL, -1) : create_token(LESSER, state->line, state->column, (LiteralType) -1,  NULL, -1);
+			break;
+
+		case '+':
+			create_token(PLUS, state->line, state->column, (LiteralType) -1,  NULL, -1);
+			break;
+
+		case '-':
+			create_token(MINUS, state->line, state->column, (LiteralType) -1,  NULL, -1);
+			break;
+
+		case '*':
+			create_token(STAR, state->line, state->column, (LiteralType) -1,  NULL, -1);
+			break;
+
+		case '/':
+			if(lookahead_match(state, '/')) {
+				while(!lookahead_pmatch(state, is_at_end));
+			} else if(lookahead_match(state, '*')) {
+				bool comment_ended = false;
+				while(!comment_ended) {
+					if(lookahead_match(state, '*')) {
+						if(lookahead_match(state, '/')) {
+							comment_ended = true;
+						}
+					}
+				}
+			}
+			else {
+				create_token(SLASH, state->line, state->column, (LiteralType) -1,  NULL, -1);
+			}
 			break;
 
 		case ' ':
