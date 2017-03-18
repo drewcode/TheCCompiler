@@ -1,4 +1,5 @@
 double a = 1, b = a;
+int c = 5, d = c;
 
 main() {
     a = 5;

@@ -1,6 +1,6 @@
 ## The current grammer implemented by the parser
 ```
-Program --> Vardecl Program | main() { Stmtlist } EOF 
+Program --> Vardecl Program | main() { Stmtlist } EOF
 
 Vardecl 	-->	Vartype Decl ;
 Vartype	-->	 CHAR | INT | DOUBLE
