@@ -387,6 +387,19 @@ void parseExpr7(ParserState *state) {
 
 	} else if(get_token(LITERAL, state)) {
 
+	} else if(get_token(OPEN_PAREN, state)) {
+		parseExpr1(state);
+		if(state->errord) {
+			return;
+		}
+
+		if(get_token(CLOSE_PAREN, state)) {
+			
+		} else {
+			// error
+			printf("Error: Expected )\n");
+			state->errord = 1;
+		}
 	} else {
 		// error
 		printf("Error: Expected Identifier or Literal or Operator\n");
