@@ -1,4 +1,6 @@
+#include "ast.h"
 #include "parser.h"
+#include "../lexer/token.h"
 
 using std::vector;
 
@@ -9,35 +11,37 @@ typedef struct ParserState {
 	int errord;
 } ParserState;
 
-void parseProgram(ParserState *state);
-void parseVarDecl(ParserState *state);
-void parseVarType(ParserState *state);
-void parseDecl(ParserState *state);
-void parseDeclCond1(ParserState *state);
-void parseDeclCond2(ParserState *state);
-void parseStmt(ParserState *state);
-void parseStmtList(ParserState *state);
+ASTProgram *parseProgram(ParserState *state, vector<ASTVariableDeclarationStatement *> *inhDeclList);
+ASTVariableDeclarationStatement *parseVarDecl(ParserState *);
+TokenType parseVarType(ParserState *state);
+vector<ASTVariableDeclarator *> *parseDecl(ParserState *, TokenType, vector<ASTVariableDeclarator *> *);
+vector<ASTVariableDeclarator *> *parseDeclContd1(ParserState *state, TokenType, vector<ASTVariableDeclarator *> *, ASTIndentifier *);
+vector<ASTVariableDeclarator *> *parseDeclContd2(ParserState *state, TokenType, vector<ASTVariableDeclarator *> *);
 
+ASTStatement *parseStmt(ParserState *state);
+vector<ASTStatement *> *parseStmtList(ParserState *state, vector<ASTStatement *> *);
 
-void parseExpr1(ParserState *state);
-void parseExpr1P(ParserState *state);
+ASTAssignmentExpression *parseExpr(ParserState *state);
 
-void parseExpr2(ParserState *state);
-void parseExpr2P(ParserState *state);
+ASTExpression *parseExpr1(ParserState *state);
+ASTExpression *parseExpr1P(ParserState *state, ASTExpression *);
 
-void parseExpr3(ParserState *state);
-void parseExpr3P(ParserState *state);
+ASTExpression *parseExpr2(ParserState *state);
+ASTExpression *parseExpr2P(ParserState *state, ASTExpression *);
 
-void parseExpr4(ParserState *state);
-void parseExpr4P(ParserState *state);
+ASTExpression *parseExpr3(ParserState *state);
+ASTExpression *parseExpr3P(ParserState *state, ASTExpression *);
 
-void parseExpr5(ParserState *state);
-void parseExpr5P(ParserState *state);
+ASTExpression *parseExpr4(ParserState *state);
+ASTExpression *parseExpr4P(ParserState *state, ASTExpression *);
 
-void parseExpr6(ParserState *state);
-void parseExpr6P(ParserState *state);
+ASTExpression *parseExpr5(ParserState *state);
+ASTExpression *parseExpr5P(ParserState *state, ASTExpression *);
 
-void parseExpr7(ParserState *state);
+ASTExpression *parseExpr6(ParserState *state);
+ASTExpression *parseExpr6P(ParserState *state, ASTExpression *);
+
+ASTExpression *parseExpr7(ParserState *state);
 
 
 int has_errord(ParserState *state) {
@@ -77,34 +81,41 @@ void runParser(vector<Token *> *tokensPtr, SymbolTable *table) {
 		.errord = 0
 	};
 
-	parseProgram(&state);
+	ASTProgram *program = parseProgram(&state, new vector<ASTVariableDeclarationStatement *>());
     if(state.current_token == state.tokens.size()) {
 		printf("Parse Successful\n");
+		program->print(0);
 	}
 }
 
-void parseProgram(ParserState *state) {
+ASTProgram *parseProgram(ParserState *state, vector<ASTVariableDeclarationStatement *> *inhDeclList) {
 	if(is_token(CHAR, state) || is_token(INT, state) || is_token(DOUBLE, state)) {
-		parseVarDecl(state);
+		ASTVariableDeclarationStatement *vardecl = parseVarDecl(state);
 		if(state->errord) {
-			return;
+			return NULL;
+		}
+		inhDeclList->push_back(vardecl);
+		ASTProgram *program = parseProgram(state, inhDeclList);
+		// error
+		if(state->errord) {
+			return NULL;
 		}
 
-		parseProgram(state);
+		return program;
 	} else if(is_token(IDENTIFIER, state)) {
 		next_token(state);
 		if(get_token(OPEN_PAREN, state)) {
 			if(get_token(CLOSE_PAREN, state)) {
 				if(get_token(OPEN_BRACE, state)) {
 
-					parseStmtList(state);
+					vector<ASTStatement *> *body = parseStmtList(state, new vector<ASTStatement *>());
 					if(state->errord) {
-						return;
+						return NULL;
 					}
 
 					if(get_token(CLOSE_BRACE, state)){
 						if(get_token(TEOF, state)) {
-
+							return new ASTProgram(inhDeclList, body);
 						} else {
 							// error
 							printf("Error: Expected End Of File\n");
@@ -135,76 +146,110 @@ void parseProgram(ParserState *state) {
 		printf("Error: Expected Identifier\n");
 		state->errord = 1;
 	}
+
+	return NULL;
 }
 
-void parseVarDecl(ParserState *state) {
-	parseVarType(state);
+ASTVariableDeclarationStatement *parseVarDecl(ParserState *state) {
+	TokenType type = parseVarType(state);
 	if(state->errord) {
-		return;
+		return NULL;
 	}
 
-	parseDecl(state);
+	vector<ASTVariableDeclarator *> * decls = parseDecl(state, type, new vector<ASTVariableDeclarator *>());
 	if(state->errord) {
-		return;
+		return NULL;
 	}
 
 	if(get_token(SEMI_COLON, state)) {
-
+		return new ASTVariableDeclarationStatement(type, decls);
 	} else {
 		printf("Error: Expected ;\n");
 		state->errord = 1;
 	}
+
+	return NULL;
 }
 
-void parseVarType(ParserState *state) {
-	if(get_token(INT, state) || get_token(CHAR, state) || get_token(DOUBLE, state)) {
-
+TokenType parseVarType(ParserState *state) {
+	if(is_token(INT, state) || is_token(CHAR, state) || is_token(DOUBLE, state)) {
+		return next_token(state)->type;
 	} else {
 		printf("Error: Expected Variable Type\n");
 		state->errord = 1;
 	}
 }
 
-void parseDecl(ParserState *state) {
-	Token *token = get_token(IDENTIFIER, state);
-	if(token) {
-		parseDeclCond1(state);
+vector<ASTVariableDeclarator *> *parseDecl(ParserState *state, TokenType inhType, vector<ASTVariableDeclarator *> *inhList) {
+	if(is_token(IDENTIFIER, state)) {
+		Token *id_token = next_token(state);
+		ASTIndentifier *id =  new ASTIndentifier(id_token->entry);
+		vector<ASTVariableDeclarator *> *list = parseDeclContd1(state, inhType, inhList, id);
 		if(state->errord) {
-
+			return NULL;
 		}
+
+		return list;
 	} else {
 		printf("Error: Expected Identifier\n");
 		state->errord = 1;
 	}
+
+	return NULL;
 }
 
-void parseDeclCond1(ParserState *state) {
-	if(get_token(COMMA, state)) {
-		parseDecl(state);
-	} else if(get_token(EQUAL, state)){
-		parseExpr7(state);
+vector<ASTVariableDeclarator *> *parseDeclContd1(ParserState *state, TokenType inhType, vector<ASTVariableDeclarator *> *inhList, ASTIndentifier *inhId) {
 
-		parseDeclCond2(state);
+	if(get_token(COMMA, state)) {
+		inhList->push_back(new ASTVariableDeclarator(inhId, NULL));
+		vector<ASTVariableDeclarator *> *list = parseDecl(state, inhType, inhList);
+		if(state->errord) {
+			return NULL;
+		}
+
+		return list;
+	} else if(get_token(EQUAL, state)){
+		ASTExpression *expr1 = parseExpr1(state);
+		if(state->errord) {
+			return NULL;
+		}
+		inhList->push_back(new ASTVariableDeclarator(inhId, expr1));
+		vector<ASTVariableDeclarator *> *list = parseDeclContd2(state, inhType, inhList);
+		if(state->errord) {
+			return NULL;
+		}
+		return list;
 	} else {
 		// epsilon
+		inhList->push_back(new ASTVariableDeclarator(inhId, NULL));
+		return inhList;
 	}
 }
 
-void parseDeclCond2(ParserState *state) {
+vector<ASTVariableDeclarator *> *parseDeclContd2(ParserState *state, TokenType inhType, vector<ASTVariableDeclarator *> *inhList) {
 	if(get_token(COMMA, state)) {
-		parseDecl(state);
+		vector<ASTVariableDeclarator *> *list = parseDecl(state, inhType, inhList);
+		if(state->errord) {
+			return NULL;
+		}
+
+		return list;
 	} else {
 		//epsilon
+		return inhList;
 	}
 }
 
-void parseExpr(ParserState *state) {
-	if(get_token(IDENTIFIER, state)) {
+ASTAssignmentExpression *parseExpr(ParserState *state) {
+	if(is_token(IDENTIFIER, state)) {
+		Token *id_t = next_token(state);
 		if(get_token(EQUAL, state)) {
-			parseExpr1(state);
+			ASTExpression *expr1 = parseExpr1(state);
 			if(state->errord) {
-				return;
+				return NULL;
 			}
+			ASTIndentifier *id = new ASTIndentifier(id_t->entry);
+			return new ASTAssignmentExpression(id, expr1);
 		} else {
 			// error
 			printf("Error: Expected =\n");
@@ -215,186 +260,231 @@ void parseExpr(ParserState *state) {
 		printf("Error: Expected Identifier\n");
 		state->errord = 1;
 	}
+
+	return NULL;
 }
 
-void parseExpr1(ParserState *state) {
-	parseExpr2(state);
+ASTExpression *parseExpr1(ParserState *state) {
+	ASTExpression * expr2 = parseExpr2(state);
 	if(state->errord) {
-		return;
+		return NULL;
 	}
 
-	parseExpr1P(state);
+	ASTExpression *expr1p = parseExpr1P(state, expr2);
 	if(state->errord) {
-		return;
+		return NULL;
 	}
+
+	return expr1p;
 }
 
-void parseExpr1P(ParserState *state) {
-	if(get_token(OR, state)) {
-		parseExpr2(state);
+ASTExpression *parseExpr1P(ParserState *state, ASTExpression *inhNode) {
+	if(is_token(OR, state)) {
+		Token *op = next_token(state);
+		ASTExpression *expr2 = parseExpr2(state);
 		if(state->errord) {
-			return;
+			return NULL;
 		}
 
-		parseExpr1P(state);
+		ASTExpression *res = new ASTBinaryExpression(op->type, inhNode, expr2);
+
+		ASTExpression *expr1p = parseExpr1P(state, res);
 		if(state->errord) {
-			return;
+			return NULL;
 		}
+
+		return expr1p;
 	} else {
 		// epsilon
+		return inhNode;
 	}
 }
 
-void parseExpr2(ParserState *state) {
-	parseExpr3(state);
+ASTExpression *parseExpr2(ParserState *state) {
+	ASTExpression *expr3 = parseExpr3(state);
 	if(state->errord) {
-		return;
+		return NULL;
 	}
 
-	parseExpr2P(state);
+	ASTExpression *expr2p = parseExpr2P(state, expr3);
 	if(state->errord) {
-		return;
+		return NULL;
 	}
+	return expr2p;
 }
-void parseExpr2P(ParserState *state) {
-	if(get_token(AND, state)) {
-		parseExpr3(state);
-		if(state->errord) {
-			return;
-		}
+ASTExpression *parseExpr2P(ParserState *state, ASTExpression *inhNode) {
+	if(is_token(AND, state)) {
+		Token *op = next_token(state);
+		ASTExpression *expr3 = parseExpr3(state);
 
-		parseExpr2P(state);
 		if(state->errord) {
-			return;
+			return NULL;
 		}
+		ASTExpression *res = new ASTBinaryExpression(op->type, inhNode, expr3);
+
+		ASTExpression *expr2p = parseExpr2P(state, res);
+		if(state->errord) {
+			return NULL;
+		}
+		return expr2p;
 	} else {
 		// epsilon
+		return inhNode;
 	}
 }
 
-void parseExpr3(ParserState *state) {
-	parseExpr4(state);
+ASTExpression *parseExpr3(ParserState *state) {
+	ASTExpression *expr4 = parseExpr4(state);
 	if(state->errord) {
-		return;
+		return NULL;
 	}
 
-	parseExpr3P(state);
+	ASTExpression *expr3p = parseExpr3P(state, expr4);
 	if(state->errord) {
-		return;
+		return NULL;
 	}
+	return expr3p;
 }
-void parseExpr3P(ParserState *state) {
-	if(get_token(EQUAL_EQUAL, state) || get_token(NOT_EQUAL, state)) {
-		parseExpr4(state);
-		if(state->errord) {
-			return;
-		}
 
-		parseExpr3P(state);
+ASTExpression *parseExpr3P(ParserState *state, ASTExpression *inhNode) {
+	if(is_token(EQUAL_EQUAL, state) || is_token(NOT_EQUAL, state)) {
+		Token *op = next_token(state);
+
+		ASTExpression *expr4 = parseExpr4(state);
 		if(state->errord) {
-			return;
+			return NULL;
 		}
+		ASTExpression *res = (op->type, inhNode, expr4);
+
+		ASTExpression *expr3p = parseExpr3P(state, res);
+		if(state->errord) {
+			return NULL;
+		}
+		return expr3p;
 	} else {
 		// epsilon
+		return inhNode;
 	}
 }
 
-void parseExpr4(ParserState *state) {
-	parseExpr5(state);
+ASTExpression *parseExpr4(ParserState *state) {
+	ASTExpression *expr5 = parseExpr5(state);
 	if(state->errord) {
-		return;
+		return NULL;
 	}
 
-	parseExpr4P(state);
+	ASTExpression *expr4p = parseExpr4P(state, expr5);
 	if(state->errord) {
-		return;
+		return NULL;
 	}
+	return expr4p;
 }
-void parseExpr4P(ParserState *state) {
-	if(get_token(GREATER_EQUAL, state) || get_token(LESSER_EQUAL, state)
-	|| get_token(GREATER, state) || get_token(LESSER, state)) {
-
-		parseExpr5(state);
+ASTExpression *parseExpr4P(ParserState *state, ASTExpression *inhNode) {
+	if(is_token(GREATER_EQUAL, state) || is_token(LESSER_EQUAL, state)
+	|| is_token(GREATER, state) || is_token(LESSER, state)) {
+		Token *op = next_token(state);
+		ASTExpression *expr5 = parseExpr5(state);
 		if(state->errord) {
-			return;
+			return NULL;
 		}
 
-		parseExpr4P(state);
+		ASTExpression *res = new ASTBinaryExpression(op->type, inhNode, expr5);
+		ASTExpression *expr4p = parseExpr4P(state, res);
 		if(state->errord) {
-			return;
+			return NULL;
 		}
+		return expr4p;
 	} else {
 		// epsilon
+		return inhNode;
 	}
 }
 
-void parseExpr5(ParserState *state) {
-	parseExpr6(state);
+ASTExpression *parseExpr5(ParserState *state) {
+	ASTExpression *expr6 = parseExpr6(state);
 	if(state->errord) {
-		return;
+		return NULL;
 	}
 
-	parseExpr5P(state);
+	ASTExpression *expr5p = parseExpr5P(state, expr6);
 	if(state->errord) {
-		return;
+		return NULL;
 	}
+
+	return expr5p;
 }
-void parseExpr5P(ParserState *state) {
-	if(get_token(PLUS, state) || get_token(MINUS, state)) {
-		parseExpr6(state);
+ASTExpression *parseExpr5P(ParserState *state, ASTExpression *inhNode) {
+	if(is_token(PLUS, state) || is_token(MINUS, state)) {
+		Token *op = next_token(state);
+		ASTExpression *expr6 = parseExpr6(state);
 		if(state->errord) {
-			return;
+			return NULL;
 		}
 
-		parseExpr5P(state);
+		ASTExpression *res = new ASTBinaryExpression(op->type, inhNode, expr6);
+
+		ASTExpression *expr5p = parseExpr5P(state, res);
 		if(state->errord) {
-			return;
+			return NULL;
 		}
+
+		return expr5p;
 	} else {
 		// epsilon
+		return inhNode;
 	}
 }
 
-void parseExpr6(ParserState *state) {
-	parseExpr7(state);
+ASTExpression *parseExpr6(ParserState *state) {
+	ASTExpression *expr7 = parseExpr7(state);
 	if(state->errord) {
-		return;
+		return NULL;
 	}
 
-	parseExpr6P(state);
+	ASTExpression *expr6p = parseExpr6P(state, expr7);
 	if(state->errord) {
-		return;
+		return NULL;
 	}
+
+	return expr6p;
 }
-void parseExpr6P(ParserState *state) {
-	if(get_token(STAR, state) || get_token(SLASH, state)) {
-		parseExpr7(state);
+
+ASTExpression *parseExpr6P(ParserState *state, ASTExpression *inhNode) {
+	if(is_token(STAR, state) || is_token(SLASH, state)) {
+		Token *op = next_token(state);
+		ASTExpression *expr7 = parseExpr7(state);
 		if(state->errord) {
-			return;
+			return NULL;
 		}
 
-		parseExpr6P(state);
+		ASTBinaryExpression *res = new ASTBinaryExpression(op->type, inhNode, expr7);
+
+		ASTExpression *expr6p = parseExpr6P(state, res);
 		if(state->errord) {
-			return;
+			return NULL;
 		}
+		return expr6p;
 	} else {
 		// epsilon
+		return inhNode;
 	}
 }
 
-void parseExpr7(ParserState *state) {
-	if(get_token(IDENTIFIER, state)) {
-
-	} else if(get_token(LITERAL, state)) {
-
+ASTExpression *parseExpr7(ParserState *state) {
+	if(is_token(IDENTIFIER, state)) {
+		Token *id_token = get_token(IDENTIFIER, state);
+		return new ASTIndentifier(id_token->entry);
+	} else if(is_token(LITERAL, state)) {
+		Token *literal_token = get_token(LITERAL, state);
+		return new ASTLiteral(literal_token->ltype, literal_token->literal);
 	} else if(get_token(OPEN_PAREN, state)) {
-		parseExpr1(state);
+		ASTExpression *expr = parseExpr1(state);
 		if(state->errord) {
-			return;
+			return NULL;
 		}
 
 		if(get_token(CLOSE_PAREN, state)) {
-			
+			return expr;
 		} else {
 			// error
 			printf("Error: Expected )\n");
@@ -405,21 +495,28 @@ void parseExpr7(ParserState *state) {
 		printf("Error: Expected Identifier or Literal or Operator\n");
 		state->errord = 1;
 	}
+
+	return NULL;
 }
 
-void parseStmt(ParserState *state) {
+ASTStatement *parseStmt(ParserState *state) {
 	if(get_token(SEMI_COLON, state)) {
-
+		return new ASTEmptyStatement();
 	} else if(is_token(CHAR, state) || is_token(INT, state) || is_token(DOUBLE, state)) {
-		parseVarDecl(state);
+		ASTStatement *stmt = parseVarDecl(state);
+		if(state->errord) {
+			return NULL;
+		}
+
+		return stmt;
 	} else if(is_token(IDENTIFIER, state)) {
 
-		parseExpr(state);
+		ASTAssignmentExpression *expr = parseExpr(state);
 		if(state->errord) {
-			return;
+			return NULL;
 		}
 		if(get_token(SEMI_COLON, state)) {
-
+			return new ASTAssignmentStatement(expr);
 		} else {
 			// error
 			printf("Error: Expected ;\n");
@@ -427,9 +524,9 @@ void parseStmt(ParserState *state) {
 		}
 
 	} else if(get_token(RETURN, state)) {
-		parseExpr1(state);
+		ASTExpression *expr1 = parseExpr1(state);
 		if(get_token(SEMI_COLON, state)) {
-
+			return new ASTReturnStatement(expr1);
 		} else {
 			// error
 			printf("Error: Expected ;\n");
@@ -438,22 +535,22 @@ void parseStmt(ParserState *state) {
 	} else if(get_token(WHILE, state)) {
 		if(get_token(OPEN_PAREN, state)) {
 
-			parseExpr1(state);
+			ASTExpression *expr1 = parseExpr1(state);
 			if(state->errord == 1) {
-				return ;
+				return NULL;
 			}
 
 			if(get_token(CLOSE_PAREN, state)) {
 
 				if(get_token(OPEN_BRACE, state)) {
 
-					parseStmtList(state);
+					vector<ASTStatement *> *stmtl = parseStmtList(state, new vector<ASTStatement *>());
 					if(state->errord == 1) {
-						return;
+						return NULL;
 					}
 
 					if(get_token(CLOSE_BRACE, state)) {
-
+						return new ASTWhileStatement(expr1, stmtl);
 					} else {
 						// error
 						printf("Error: Expected }\n");
@@ -481,18 +578,21 @@ void parseStmt(ParserState *state) {
 		printf("Error: OMG WTF\n");
 		state->errord = 1;
 	}
+
+	return NULL;
 }
 
-void parseStmtList(ParserState *state) {
+vector<ASTStatement *> *parseStmtList(ParserState *state, vector<ASTStatement *> *inhList) {
 	if(is_token(CHAR, state) || is_token(INT, state) || is_token(DOUBLE, state) || is_token(SEMI_COLON, state)
 		|| is_token(WHILE, state) || is_token(IDENTIFIER, state) || is_token(RETURN, state)) {
-		parseStmt(state);
+		ASTStatement *stmt = parseStmt(state);
 		if(state->errord == 1) {
-			return;
+			return NULL;
 		}
-
-		parseStmtList(state);
+		inhList->push_back(stmt);
+		return parseStmtList(state, inhList);
 	} else {
 		// epsilon
+		return inhList;
 	}
 }

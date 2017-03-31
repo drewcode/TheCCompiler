@@ -28,7 +28,7 @@ Expr5	-->	Expr6 Expr5'
 Expr5'	-->	+ Expr6 Expr5' | - Expr6 Expr5' | ep
 
 Expr6	-->	Expr7 Expr6'
-Expr6'	-->	* Expr7 Expr6' | * Expr7 Expr6' | ep
+Expr6'	-->	* Expr7 Expr6' | / Expr7 Expr6' | ep
 
 Expr7	-->	LITERAL | ID | (Expr1)
 

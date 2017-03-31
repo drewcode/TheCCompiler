@@ -47,6 +47,7 @@ Expr5'	-->	+ Expr6 { result = new BinaryExpression(+, Expr5'.inhNode, Expr6.node
     | ep {Expr5'.node = Expr5'.inhNode}
 
 Expr6	-->	Expr7 {Expr6'.inhNode = Expr7.node} Expr6' {Expr6.node = Expr6'.node}
+
 Expr6'	-->	* Expr7 { result = new BinaryExpression(*, Expr6'.inhNode, Expr7.node); Expr6'1.inhNode = result;  } Expr6' {Expr6'.node = Expr6'1.node}
     | / Expr7 { result = new BinaryExpression(/, Expr6'.inhNode, Expr7.node); Expr6'1.inhNode = result;  } Expr6' {Expr6'.node = Expr6'1.node}
     | ep {Expr6'.node = Expr6'.inhNode}
@@ -62,6 +63,6 @@ Stmt --> ; {Stmt.node = new EmptyStatement()}
     | return Expr ; {Stmt.node = new ReturnStatement(Expr.node)}
 
 Stmtlist --> Stmt {list = Stmtlist.inhList.push(Stmt.node); Stmtlist1.inhList = list} Stmtlist
-    | ep {Stmtlist.list = Stmtlist.inhType}
+    | ep {Stmtlist.list = Stmtlist.inhList}
 
 ```
