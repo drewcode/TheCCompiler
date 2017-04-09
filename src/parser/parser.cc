@@ -83,8 +83,9 @@ void runParser(vector<Token *> *tokensPtr, SymbolTable *table) {
 
 	ASTProgram *program = parseProgram(&state, new vector<ASTVariableDeclarationStatement *>());
     if(state.current_token == state.tokens.size()) {
+    	FILE *icg_f = fopen("test.icg", "w");
 		printf("Parse Successful\n");
-		program->print(0);
+		program->print(0, icg_f);
 	}
 }
 

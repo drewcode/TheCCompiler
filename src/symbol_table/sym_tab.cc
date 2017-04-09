@@ -26,3 +26,7 @@ void printSymbolTable(SymbolTable *table) {
 		printf("%d %s\n", i, table->operator[](i)->name);
 	}
 }
+
+char *getSymbolTableEntry(SymbolTable *table, int index) {
+	return table->operator[](index)->name;
+}

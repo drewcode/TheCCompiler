@@ -11,5 +11,6 @@ typedef std::vector<SymbolTableEntry *> SymbolTable;
 
 int insertSymbol(SymbolTable *, char *);
 void printSymbolTable(SymbolTable *);
+char *getSymbolTableEntry(SymbolTable *, int);
 
 #endif

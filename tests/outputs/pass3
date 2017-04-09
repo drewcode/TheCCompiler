@@ -1,0 +1,12 @@
+i1 = 1.5 op28 1.4 
+i2 = 1.5 op28 i1 
+i0 = 5 op28 6 
+T12 = 1.5 op21 i1 
+T15 = i1 op23 i2 
+T16 = T12 op30 T15 
+L0: 
+ifFalse T16 goto L1 
+T19 = 14 op27 5 
+i3 = T19 op28 3 
+goto L0 
+L1: 

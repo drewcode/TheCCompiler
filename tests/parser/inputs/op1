@@ -1,0 +1,61 @@
+Parse Successful
+Program
+	VariableDeclarationStatement
+		Double
+		VariableDeclarator
+			Identifier 0
+			Literal
+				Double: 1.500000
+		VariableDeclarator
+			Identifier 1
+			BinaryExpression
+				28
+				Identifier 0
+				Literal
+					Double: 1.400000
+	VariableDeclarationStatement
+		Int
+		VariableDeclarator
+			Identifier 2
+			BinaryExpression
+				28
+				Identifier 0
+				Identifier 1
+		VariableDeclarator
+			Identifier 3
+	MainFunction
+		AssignmentStatement
+			AssignmentExpression
+				Identifier 0
+				BinaryExpression
+					28
+					Literal
+						Int: 5
+					Literal
+						Int: 6
+		WhileStatement
+			Test
+				BinaryExpression
+					30
+					BinaryExpression
+						21
+						Identifier 0
+						Identifier 1
+					BinaryExpression
+						23
+						Identifier 1
+						Identifier 2
+			Body
+				AssignmentStatement
+					AssignmentExpression
+						Identifier 3
+						BinaryExpression
+							28
+							BinaryExpression
+								27
+								Literal
+									Int: 14
+								Literal
+									Int: 5
+							Literal
+								Int: 3
